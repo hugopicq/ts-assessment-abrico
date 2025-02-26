@@ -2,14 +2,16 @@
 
 import { Suspense, useEffect, useState } from 'react';
 
-import { Spinner } from '@chakra-ui/react';
+import { Spinner, Table } from '@chakra-ui/react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
 import { toastCustom } from '@/components/Toast';
+import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import PageHome from '@/features/app-home/PageHome';
+import { AppLayoutPage } from '@/features/app/AppLayoutPage';
 import { trpc } from '@/lib/trpc/client';
 
 export default function Page() {
@@ -20,6 +22,7 @@ export default function Page() {
 
   const { isLoading, error, data } = trpc.operations.getDocuments.useQuery({
     companyId,
+    docType: 'ATTESTATION_RGE',
   });
   const saveDocuments = trpc.operations.setDocumentsForOperation.useMutation();
 
@@ -58,7 +61,18 @@ export default function Page() {
 
   return (
     <Suspense>
-      <div>
+      <AppLayoutPage>
+        <BreadcrumbRoot>
+          <BreadcrumbLink href="/app">Application</BreadcrumbLink>
+          <BreadcrumbLink href="/app/company/company1/project/project1/operations">
+            Operations
+          </BreadcrumbLink>
+          <BreadcrumbLink
+            href={`/app/company/company1/project/project1/operations/${operationId}`}
+          >
+            {operationId}
+          </BreadcrumbLink>
+        </BreadcrumbRoot>
         <h1>Documents</h1>
         {isLoading ? (
           <Spinner />
@@ -71,7 +85,7 @@ export default function Page() {
                     checked={assignedDocumentIds.has(document.id)}
                     onCheckedChange={() => toggleDocument(document.id)}
                   />
-                  {document.id}
+                  {document.id} ({document.docType} - {document.codeAdeme})
                 </li>
               ))}
             </ul>
@@ -80,7 +94,7 @@ export default function Page() {
             </Button>
           </div>
         )}
-      </div>
+      </AppLayoutPage>
     </Suspense>
   );
 }

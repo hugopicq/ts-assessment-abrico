@@ -1,4 +1,5 @@
 import { cleanup } from '@testing-library/react';
+import pino from 'pino';
 import { afterEach, vi } from 'vitest';
 
 import '@/lib/dayjs/config';
@@ -18,3 +19,10 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+vi.mock('@/server/config/db', () => ({}));
+vi.mock('@/server/config/lucia', () => ({}));
+vi.mock('@/server/config/logger', () => ({
+  logger: pino(),
+}));
+vi.mock('@/server/config/email', () => ({}));

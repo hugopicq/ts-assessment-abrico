@@ -1,7 +1,7 @@
 import { createTRPCRouter } from '@/server/config/trpc';
 import { authRouter } from '@/server/routers/auth';
 
-import { operationRouter } from './routers/operations';
+import { operationRouter } from './routers/operations/router';
 
 /**
  * This is the primary router for your server.

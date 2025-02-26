@@ -1,40 +1,15 @@
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
+import { string, z } from 'zod';
 
+import { createTRPCRouter, protectedProcedure } from '../../config/trpc';
 import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from '../config/trpc';
-
-const getOperationsRequestSchema = z.object({ projectId: z.string() });
-
-const getOperationsResponseSchema = z.object({
-  operations: z.array(
-    z.object({
-      id: z.string(),
-    })
-  ),
-});
-
-const getDocumentsRequestSchema = z.object({ companyId: z.string() });
-const getDocumentsResponseSchema = z.object({
-  documents: z.array(
-    z.object({
-      id: z.string(),
-      operationIds: z.array(z.string()),
-    })
-  ),
-});
-
-const setDocumentsForOperationRequestSchema = z.object({
-  operationId: z.string(),
-  documentsId: z.array(z.string()),
-});
-
-const setDocumentsForOperationResponseSchema = z.object({
-  success: z.boolean(),
-});
+  getDocumentsRequestSchema,
+  getDocumentsResponseSchema,
+  getOperationsRequestSchema,
+  getOperationsResponseSchema,
+  setDocumentsForOperationRequestSchema,
+  setDocumentsForOperationResponseSchema,
+} from './schemas';
 
 export const operationRouter = createTRPCRouter({
   getOperations: protectedProcedure()
@@ -51,7 +26,10 @@ export const operationRouter = createTRPCRouter({
         where: { projectId: { equals: input.projectId } },
       });
       return {
-        operations: operations.map((op) => ({ id: op.id })),
+        operations: operations.map((op) => ({
+          id: op.id,
+          codeAdeme: op.codeAdeme,
+        })),
       };
     }),
   getDocuments: protectedProcedure()
@@ -65,9 +43,18 @@ export const operationRouter = createTRPCRouter({
     .output(getDocumentsResponseSchema)
     .query(async ({ ctx, input }) => {
       const documents = await ctx.db.document.findMany({
-        where: { companyId: { equals: input.companyId } },
+        where: {
+          AND: [
+            { companyId: { equals: input.companyId } },
+            ...(input.docType !== undefined
+              ? [{ docType: { equals: input.docType } }]
+              : []),
+          ],
+        },
         select: {
           id: true,
+          codeAdeme: true,
+          docType: true,
           operations: {
             select: {
               id: true,
@@ -79,6 +66,8 @@ export const operationRouter = createTRPCRouter({
         documents: documents.map((document) => ({
           id: document.id,
           operationIds: document.operations.map((op) => op.id),
+          codeAdeme: document.codeAdeme,
+          docType: document.docType,
         })),
       };
     }),
@@ -97,7 +86,13 @@ export const operationRouter = createTRPCRouter({
         select: { project: { select: { companyId: true } } },
       });
 
-      //We should check that the company for the operation is authorized for the user
+      //We should also check that the company for the operation is authorized for the user
+      if (!dbOperation) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Operation ID not found',
+        });
+      }
 
       const companyDocuments = await ctx.db.document.findMany({
         where: { companyId: { equals: dbOperation?.project.companyId } },

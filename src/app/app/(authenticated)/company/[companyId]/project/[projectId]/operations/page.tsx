@@ -8,7 +8,9 @@ import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
 import { toastCustom } from '@/components/Toast';
+import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/breadcrumb';
 import PageHome from '@/features/app-home/PageHome';
+import { AppLayoutPage } from '@/features/app/AppLayoutPage';
 import { trpc } from '@/lib/trpc/client';
 
 export default function Page() {
@@ -25,21 +27,29 @@ export default function Page() {
 
   return (
     <Suspense>
-      {isLoading ? (
-        <Spinner />
-      ) : (
-        <>
-          {data?.operations.map((operation) => (
-            <div key={operation.id}>
-              <Link
-                href={`/app/company/${companyId}/project/${projectId}/operations/${operation.id}`}
-              >
-                {operation.id}
-              </Link>
-            </div>
-          ))}
-        </>
-      )}
+      <AppLayoutPage>
+        <BreadcrumbRoot>
+          <BreadcrumbLink href="/app">Application</BreadcrumbLink>
+          <BreadcrumbLink href="/app/company/company1/project/project1/operations">
+            Operations
+          </BreadcrumbLink>
+        </BreadcrumbRoot>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <>
+            {data?.operations.map((operation) => (
+              <div key={operation.id}>
+                <Link
+                  href={`/app/company/${companyId}/project/${projectId}/operations/${operation.id}`}
+                >
+                  {operation.id}
+                </Link>
+              </div>
+            ))}
+          </>
+        )}
+      </AppLayoutPage>
     </Suspense>
   );
 }
