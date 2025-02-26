@@ -54,7 +54,11 @@ export default function Page() {
   const toggleDocument = (id: string) => {
     setAssignedDocumentIds((prev) => {
       const newChecked = new Set(prev);
-      newChecked.has(id) ? newChecked.delete(id) : newChecked.add(id);
+      if (newChecked.has(id)) {
+        newChecked.delete(id);
+      } else {
+        newChecked.add(id);
+      }
       return newChecked;
     });
   };
