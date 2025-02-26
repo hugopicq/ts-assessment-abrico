@@ -2,13 +2,22 @@
 
 import { Suspense, useEffect, useState } from 'react';
 
-import { Spinner } from '@chakra-ui/react';
+import {
+  Alert,
+  Card,
+  Grid,
+  GridItem,
+  Heading,
+  Spinner,
+  Stack,
+} from '@chakra-ui/react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
 import { toastCustom } from '@/components/Toast';
 import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/breadcrumb';
+import { LinkButton } from '@/components/ui/link-button';
 import PageHome from '@/features/app-home/PageHome';
 import { AppLayoutPage } from '@/features/app/AppLayoutPage';
 import { trpc } from '@/lib/trpc/client';
@@ -23,31 +32,71 @@ export default function Page() {
     projectId,
   });
 
-  const { t } = useTranslation(['auth']);
+  const { t } = useTranslation(['abrico']);
+
+  useEffect(() => {
+    if (error) {
+      toastCustom({
+        status: 'error',
+        title: t('abrico:errors.loading'),
+      });
+    }
+  }, [error]);
 
   return (
     <Suspense>
       <AppLayoutPage>
         <BreadcrumbRoot>
-          <BreadcrumbLink href="/app">Application</BreadcrumbLink>
-          <BreadcrumbLink href="/app/company/company1/project/project1/operations">
-            Operations
+          <BreadcrumbLink href="/app">
+            {t('abrico:breadCrumbs.application')}
+          </BreadcrumbLink>
+          <BreadcrumbLink
+            href={`/app/company/${companyId}/project/${projectId}/operations`}
+          >
+            {t('abrico:breadCrumbs.operations')}
           </BreadcrumbLink>
         </BreadcrumbRoot>
-        {isLoading ? (
-          <Spinner />
-        ) : (
-          <>
-            {data?.operations.map((operation) => (
-              <div key={operation.id}>
-                <Link
-                  href={`/app/company/${companyId}/project/${projectId}/operations/${operation.id}`}
-                >
-                  {operation.id}
-                </Link>
-              </div>
-            ))}
-          </>
+        <Heading mt="5" mb="5" fontSize="lg">
+          {t('abrico:breadCrumbs.operations')}
+        </Heading>
+
+        {error !== null && (
+          <Alert.Root status="error">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{t('abrico:errors.loading')}</Alert.Title>
+              <Alert.Description>
+                {t('abrico:errors.loading')}
+              </Alert.Description>
+            </Alert.Content>
+          </Alert.Root>
+        )}
+
+        {error === null && isLoading && <Spinner />}
+
+        {error === null && !isLoading && (
+          <Stack>
+            <Grid templateColumns="repeat(5, 1fr)" gap="6">
+              {data?.operations.map((operation) => (
+                <GridItem key={operation.id}>
+                  <Card.Root>
+                    <Card.Body>
+                      <Card.Title mt="2">
+                        {operation.id} ({operation.codeAdeme})
+                      </Card.Title>
+                      <Card.Description mt="4">
+                        <LinkButton
+                          href={`/app/company/${companyId}/project/${projectId}/operations/${operation.id}`}
+                        >
+                          {t('abrico:operations.updateDocuments')}
+                        </LinkButton>
+                      </Card.Description>
+                    </Card.Body>
+                  </Card.Root>
+                </GridItem>
+              ))}
+            </Grid>
+          </Stack>
         )}
       </AppLayoutPage>
     </Suspense>

@@ -1,0 +1,16 @@
+{
+  "breadCrumbs": {
+    "application": "Application",
+    "operations": "Operations",
+    "documents": "Documents"
+  },
+  "operations": {
+    "updateDocuments": "Update Documents",
+    "codeAdeme": "Code Ademe",
+    "save": "Save"
+  },
+  "errors": {
+    "loading": "Could not load data",
+    "save": "Could not save data"
+  }
+}

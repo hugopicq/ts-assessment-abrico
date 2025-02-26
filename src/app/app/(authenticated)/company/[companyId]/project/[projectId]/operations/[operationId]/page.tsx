@@ -2,7 +2,16 @@
 
 import { Suspense, useEffect, useState } from 'react';
 
-import { Spinner, Table } from '@chakra-ui/react';
+import {
+  Alert,
+  Card,
+  Grid,
+  GridItem,
+  Heading,
+  Spinner,
+  Stack,
+  Table,
+} from '@chakra-ui/react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
@@ -18,19 +27,27 @@ export default function Page() {
   const params = useParams();
 
   const companyId = params?.companyId?.toString() ?? '';
+  const projectId = params?.projectId?.toString() ?? '';
   const operationId = params?.operationId?.toString() ?? '';
 
   const { isLoading, error, data } = trpc.operations.getDocuments.useQuery({
     companyId,
     docType: 'ATTESTATION_RGE',
   });
-  const saveDocuments = trpc.operations.setDocumentsForOperation.useMutation();
+  const saveDocuments = trpc.operations.setDocumentsForOperation.useMutation({
+    onError: () => {
+      toastCustom({
+        status: 'error',
+        title: t('abrico:errors.save'),
+      });
+    },
+  });
 
   const [assignedDocumentIds, setAssignedDocumentIds] = useState<Set<string>>(
     new Set()
   );
 
-  const { t } = useTranslation(['auth']);
+  const { t } = useTranslation(['abrico']);
 
   useEffect(() => {
     if (data?.documents !== undefined) {
@@ -43,6 +60,15 @@ export default function Page() {
       );
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      toastCustom({
+        status: 'error',
+        title: t('abrico:errors.loading'),
+      });
+    }
+  }, [error]);
 
   const handleSave = () => {
     saveDocuments.mutate({
@@ -67,36 +93,68 @@ export default function Page() {
     <Suspense>
       <AppLayoutPage>
         <BreadcrumbRoot>
-          <BreadcrumbLink href="/app">Application</BreadcrumbLink>
-          <BreadcrumbLink href="/app/company/company1/project/project1/operations">
-            Operations
+          <BreadcrumbLink href="/app">
+            {t('abrico:breadCrumbs.application')}
           </BreadcrumbLink>
           <BreadcrumbLink
-            href={`/app/company/company1/project/project1/operations/${operationId}`}
+            href={`/app/company/${companyId}/project/${projectId}/operations`}
+          >
+            {t('abrico:breadCrumbs.operations')}
+          </BreadcrumbLink>
+          <BreadcrumbLink
+            href={`/app/company/${companyId}/project/${projectId}/operations/${operationId}`}
           >
             {operationId}
           </BreadcrumbLink>
         </BreadcrumbRoot>
-        <h1>Documents</h1>
-        {isLoading ? (
-          <Spinner />
-        ) : (
-          <div>
-            <ul>
+        <Heading mt="5" mb="5" fontSize="lg">
+          {t('abrico:breadCrumbs.documents')}
+        </Heading>
+
+        {error !== null && (
+          <Alert.Root status="error">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{t('abrico:errors.loading')}</Alert.Title>
+              <Alert.Description>
+                {t('abrico:errors.loading')}
+              </Alert.Description>
+            </Alert.Content>
+          </Alert.Root>
+        )}
+
+        {error === null && isLoading && <Spinner />}
+
+        {error === null && !isLoading && (
+          <Stack>
+            <Grid templateColumns="repeat(4, 1fr)" gap="6">
               {data?.documents.map((document) => (
-                <li key={document.id} className="flex items-center gap-2">
-                  <Checkbox
-                    checked={assignedDocumentIds.has(document.id)}
-                    onCheckedChange={() => toggleDocument(document.id)}
-                  />
-                  {document.id} ({document.docType} - {document.codeAdeme})
-                </li>
+                <GridItem key={document.id}>
+                  <Card.Root>
+                    <Card.Body>
+                      <Card.Title mt="2">{document.id}</Card.Title>
+                      <Card.Description>
+                        {t('abrico:operations.codeAdeme')}: {document.codeAdeme}
+                      </Card.Description>
+                    </Card.Body>
+                    <Card.Footer>
+                      <Checkbox
+                        checked={assignedDocumentIds.has(document.id)}
+                        onCheckedChange={() => toggleDocument(document.id)}
+                      />
+                    </Card.Footer>
+                  </Card.Root>
+                </GridItem>
               ))}
-            </ul>
-            <Button onClick={handleSave} disabled={saveDocuments.isPending}>
-              Save
+            </Grid>
+            <Button
+              mt="4"
+              onClick={handleSave}
+              disabled={saveDocuments.isPending}
+            >
+              {t('abrico:operations.save')}
             </Button>
-          </div>
+          </Stack>
         )}
       </AppLayoutPage>
     </Suspense>
