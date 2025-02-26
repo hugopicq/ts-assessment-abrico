@@ -88,7 +88,7 @@ export default function Page() {
                         <LinkButton
                           href={`/app/company/${companyId}/project/${projectId}/operations/${operation.id}`}
                         >
-                          {t('abrico:operations.updateDocuments')}
+                          {t('abrico:operations.updateRGEDocuments')}
                         </LinkButton>
                       </Card.Description>
                     </Card.Body>

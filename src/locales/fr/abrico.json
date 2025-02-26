@@ -2,15 +2,15 @@
   "breadCrumbs": {
     "application": "Application",
     "operations": "Operations",
-    "documents": "Documents"
+    "documents": "Documents RGE"
   },
   "operations": {
-    "updateDocuments": "Update Documents",
+    "updateRGEDocuments": "Assigner des attestation RGE",
     "codeAdeme": "Code Ademe",
-    "save": "Save"
+    "save": "Enregistrer"
   },
   "errors": {
-    "loading": "Could not load data",
-    "save": "Could not save data"
+    "loading": "Erreur au chargement des données",
+    "save": "Erreur à la sauvegarde"
   }
 }
