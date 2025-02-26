@@ -97,12 +97,11 @@ export const operationRouter = createTRPCRouter({
       const companyDocuments = await ctx.db.document.findMany({
         where: { companyId: { equals: dbOperation?.project.companyId } },
       });
-      const companyDocumentIds = companyDocuments.map((doc) => doc.id);
 
-      //n2 loop but acceptable given the number of data we are processing
-      if (
-        input.documentsId.some((docId) => !companyDocumentIds.includes(docId))
-      ) {
+      const companyDocumentIds = new Set(companyDocuments.map((doc) => doc.id));
+      const inputDocumentIds = new Set(input.documentsId);
+
+      if (inputDocumentIds.difference(companyDocumentIds).size > 0) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message:
