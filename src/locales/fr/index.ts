@@ -1,6 +1,7 @@
 import 'dayjs/locale/fr';
 import zod from 'zod-i18n-map/locales/fr/zod.json';
 
+import abrico from './abrico.json';
 import account from './account.json';
 import admin from './admin.json';
 import adminDashboard from './adminDashboard.json';
@@ -16,6 +17,7 @@ import users from './users.json';
 
 export default {
   account,
+  abrico,
   admin,
   adminDashboard,
   app,

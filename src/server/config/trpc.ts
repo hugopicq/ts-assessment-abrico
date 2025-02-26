@@ -233,3 +233,5 @@ export const protectedProcedure = (
       });
     })
   );
+
+export const createCallerFactory = t.createCallerFactory;

@@ -1,0 +1,45 @@
+model Company {
+  id        String     @id
+  documents Document[]
+  projects  Project[]
+}
+
+model Project {
+  id         String      @id
+  companyId  String
+  operations Operation[]
+  company    Company     @relation(fields: [companyId], references: [id])
+}
+
+model Operation {
+  id        String     @id
+  projectId String
+  codeAdeme ECodeAdeme
+  project   Project    @relation(fields: [projectId], references: [id])
+  documents Document[]
+}
+
+model Document {
+  id         String      @id
+  docType    EDocType
+  companyId  String
+  codeAdeme  ECodeAdeme
+  company    Company     @relation(fields: [companyId], references: [id])
+  operations Operation[]
+}
+
+enum EDocType {
+  ATTESTATION_RGE
+  DEVIS
+  FACTURE
+  FICHE_TECHNIQUE
+}
+
+enum ECodeAdeme {
+  BAR_TH_171
+  BAR_TH_172
+  BAR_TH_159
+  BAR_EN_101
+  BAR_EN_102
+  BAR_EN_103
+}
